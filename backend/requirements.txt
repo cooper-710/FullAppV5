@@ -4,3 +4,5 @@ python-dotenv>=1.0
 pybaseball>=2.2
 fpdf2>=2.7
 great_expectations>=0.18
+httpx>=0.26
+pytest>=7.4

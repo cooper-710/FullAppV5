@@ -2,17 +2,17 @@
 from fastapi import FastAPI, Query, HTTPException
 import requests
 import re
-from typing import List, Dict, Any
+from typing import Dict, Any, List, Literal, Optional
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from typing import Optional, Literal, Dict, Any, List
 
 import numpy as np
 import pandas as pd
 
 # Sequence fetcher (your trusted source)
 from backend.sequence_src.scrape_savant import fetch_hitter_statcast, summarize_hitter_seasons
+from sequence_biolab_api.deep_dive import build_pitcher_deep_dive
 
 app = FastAPI(title="Biolab API", version="1.0.0")
 
@@ -223,9 +223,28 @@ def hitter_heatmap(
     grid = pivot.astype(int).values.tolist()
     return {"bid": bid, "season": season, "grid": grid}
 
+@app.get("/api/deep-dive/pitcher/full")
+async def pitcher_deep_dive_full(
+    mlbam: int = Query(..., ge=1),
+    year: int = Query(..., ge=1900),
+    span: Literal["regular", "postseason", "total"] = Query("regular"),
+    rollup: Literal["season", "last3", "career"] = Query("season"),
+) -> Dict[str, Any]:
+    try:
+        payload = await build_pitcher_deep_dive(
+            mlbam=mlbam,
+            year=year,
+            span=span,
+            rollup=rollup,
+        )
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:  # pragma: no cover
+        raise HTTPException(status_code=500, detail=str(exc))
+    return JSONResponse(content=jsonable_encoder(payload))
 
-
-from fastapi import Query
 from pathlib import Path as _Path
 
 def _local_player_search(q: str):
@@ -488,4 +507,3 @@ def hitters_season_all(
     except Exception as e:
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=str(e))
-
