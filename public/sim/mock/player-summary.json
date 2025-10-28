@@ -1,0 +1,22 @@
+{
+  "player": "Pete Alonso",
+  "hand": "R",
+  "age": 30,
+  "bip": 509,
+  "spray": [
+    {
+      "px": -12.3,
+      "pz": 30.1,
+      "ev": 108.2,
+      "la": 28.5,
+      "is_hr": true
+    }
+  ],
+  "rates": {
+    "wrc_plus": 144,
+    "hr": 40,
+    "bb_pct": 9.0,
+    "k_pct": 23.0
+  },
+  "year": 2025
+}
