@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useAppState } from '@/lib/state';
-import { getNextOpponent } from '@/data/schedule';
+import { fetchNextOpponent } from '@/lib/api/fullApp';
 
-type NextOpp = Awaited<ReturnType<typeof getNextOpponent>>;
+type NextOpp = Awaited<ReturnType<typeof fetchNextOpponent>> | null;
 
 export function GameDayClient() {
   const { teamKey } = useAppState();
@@ -11,11 +11,19 @@ export function GameDayClient() {
 
   useEffect(() => {
     let live = true;
-    getNextOpponent(teamKey).then((d) => {
-      if (live) setNext(d);
-    });
+    const ctrl = new AbortController();
+    fetchNextOpponent(teamKey, ctrl.signal)
+      .then((d) => {
+        if (live) setNext(d);
+      })
+      .catch((err) => {
+        if (!live) return;
+        console.warn('Failed to load next opponent', err);
+        setNext(null);
+      });
     return () => {
       live = false;
+      ctrl.abort();
     };
   }, [teamKey]);
 
@@ -28,6 +36,12 @@ export function GameDayClient() {
             {next.teamName} vs <span className="font-medium text-text">{next.opponentName}</span>
             <br />
             First pitch: {new Date(next.gameTimeLocal).toLocaleString()}
+            {next.source && (
+              <>
+                <br />
+                Source: {next.source}
+              </>
+            )}
           </p>
         ) : (
           <p className="text-sm text-muted">No upcoming game found.</p>

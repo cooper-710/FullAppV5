@@ -7,7 +7,7 @@ export const MOCAP_NAME_MAP: Record<string, Record<string, string>> = {
   },
 
   // Pro example (adjust if your MoCap data uses different labels)
-  'pro:ny-mets': {
+  'mlb:NYM': {
     'Tylor Megill': 'Tylor Megill',
   },
 };
