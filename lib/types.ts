@@ -1,5 +1,7 @@
 export type MLBPlayerId = number;
 
+export type OrgLevel = 'college' | 'pro';
+
 export type HitterSeason = {
   playerId: MLBPlayerId;
   season: number;
@@ -26,4 +28,14 @@ export type PlayerIdentity = {
   primaryNumber?: string;
   primaryPosition?: { code: string; name: string };
   currentTeam?: { id: number; name: string; abbreviation: string };
+};
+
+export type MetricDef = {
+  key: string;
+  label: string;
+  entity: 'hitter' | 'pitcher' | 'both';
+  unit?: string;
+  description: string;
+  sourcePreference: string[];
+  freshnessSLA: string;
 };

@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { listPlayers } from '@/lib/entities';
 import { useAppState } from '@/lib/state';
-import { PV_BASE, buildPVUrl, toLastFirst } from '@/lib/pv';
+import { buildPVUrl, toLastFirst } from '@/lib/pv';
 import { pvTeamCode } from '@/lib/teamCodes';
+import { useRoster } from '@/lib/hooks/useRoster';
 
 const FALLBACK_TEAM = 'ARI';
 const FALLBACK_PITCHER = 'Backhus, Kyle';
@@ -14,7 +14,9 @@ const DEFAULT_ORBIT = 1;
 
 export default function PVEmbed() {
   const { teamKey } = useAppState();
-  const roster = listPlayers(teamKey).filter((p) => p.kind === 'pitcher');
+  const { players } = useRoster(teamKey);
+  const roster = useMemo(() => (players ?? []).filter((p) => p.kind === 'pitcher'), [players]);
+  const firstPitcher = useMemo(() => roster[0]?.name, [roster]);
 
   const [teamCode, setTeamCode] = useState<string>(FALLBACK_TEAM);
   const [pitcher, setPitcher] = useState<string>(FALLBACK_PITCHER);
@@ -22,9 +24,9 @@ export default function PVEmbed() {
   useEffect(() => {
     const code = pvTeamCode(teamKey) || FALLBACK_TEAM;
     setTeamCode(code);
-    if (roster.length) setPitcher(toLastFirst(roster[0].name));
+    if (firstPitcher) setPitcher(toLastFirst(firstPitcher));
     else setPitcher(FALLBACK_PITCHER);
-  }, [teamKey, roster.length]);
+  }, [teamKey, roster.length, firstPitcher]);
 
   const src = useMemo(() => {
     // Always provide a fully-formed URL; your tool can override via its own sidebar.

@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { listPlayers } from '@/lib/entities';
 import { useAppState } from '@/lib/state';
 import { buildMocapUrl } from '@/lib/mocap';
 import { toMocapPlayerName } from '@/lib/mocapMap';
+import { useRoster } from '@/lib/hooks/useRoster';
 
 const FALLBACK_PLAYER = 'Player Name';
 const FALLBACK_SESSION = '2025-08-18';
@@ -12,17 +12,18 @@ const DEFAULT_LOCK = 1 as const;
 
 export default function MocapEmbed() {
   const { teamKey } = useAppState();
-  const roster = useMemo(() => listPlayers(teamKey), [teamKey]);
+  const { players: roster } = useRoster(teamKey);
+  const rosterMemo = useMemo(() => roster ?? [], [roster]);
+  const primaryName = useMemo(() => rosterMemo[0]?.name, [rosterMemo]);
 
   const [player, setPlayer] = useState<string>(FALLBACK_PLAYER);
   const [session, setSession] = useState<string>(FALLBACK_SESSION);
 
   useEffect(() => {
-    const candidate = roster.length ? roster[0].name : undefined;
-    const mapped = toMocapPlayerName(teamKey, candidate);
+    const mapped = toMocapPlayerName(teamKey, primaryName);
     setPlayer(mapped || FALLBACK_PLAYER);
     setSession(FALLBACK_SESSION);
-  }, [teamKey, roster.length]);
+  }, [teamKey, primaryName]);
 
   const src = useMemo(() => {
     const p = player || FALLBACK_PLAYER;

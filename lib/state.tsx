@@ -1,19 +1,13 @@
 'use client';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import TEAM_OPTIONS, { DEFAULT_TEAM_KEY, TeamOption } from '@/lib/app-options';
 
-type Opt = { label: string; value: string };
-type AppState = { teamKey: string; setTeamKey: (k: string) => void; options: Opt[] };
+type AppState = { teamKey: string; setTeamKey: (k: string) => void; options: TeamOption[] };
 
 const Ctx = createContext<AppState | null>(null);
 
-const DEFAULT = 'college:wright-state';
-const OPTIONS: Opt[] = [
-  { label: 'Wright State (College)', value: 'college:wright-state' },
-  { label: 'NY Mets (Pro)', value: 'pro:ny-mets' },
-];
-
 export function AppStateProvider({ children }: { children: React.ReactNode }) {
-  const [teamKey, setTeamKey] = useState<string>(DEFAULT);
+  const [teamKey, setTeamKey] = useState<string>(DEFAULT_TEAM_KEY);
 
   useEffect(() => {
     const k = window.localStorage.getItem('sbl.teamKey');
@@ -23,7 +17,7 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem('sbl.teamKey', teamKey);
   }, [teamKey]);
 
-  const value = useMemo(() => ({ teamKey, setTeamKey, options: OPTIONS }), [teamKey]);
+  const value = useMemo(() => ({ teamKey, setTeamKey, options: TEAM_OPTIONS }), [teamKey]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

@@ -1,11 +1,12 @@
 'use client';
 
 import { Info } from 'lucide-react';
-import { STAT_DICTIONARY } from '@/data/stat-dictionary';
+import { useMetricDictionary } from '@/lib/hooks/useMetricDictionary';
 import { SourceBadge } from '@/components/Badges';
 
 export function MetricInfo({ keyName }: { keyName: string }) {
-  const m = STAT_DICTIONARY.find((x) => x.key === keyName);
+  const { data } = useMetricDictionary();
+  const m = data?.find((x) => x.key === keyName);
   if (!m) return null;
 
   return (
